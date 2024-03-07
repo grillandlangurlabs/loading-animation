@@ -1,135 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Chat</title>
-    <style>
-        #videos {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .video {
-            margin: 10px;
-            border: 1px solid #ccc;
-        }
-    </style>
-</head>
-<body>
-    <div id="videos"></div>
-
-    <script src="https://cdn.jsdelivr.net/npm/simplewebrtc/out/simplewebrtc-with-adapter.bundle.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/adapterjs@0.21.0/dist/adapter.js"></script>
-    <script>
-        const webrtc = new SimpleWebRTC({
-            localVideoEl: 'videos',
-            remoteVideosEl: 'videos',
-            autoRequestMedia: true
-        });
-
-        webrtc.on('readyToCall', () => {
-            webrtc.joinRoom('your-room-name');
-  // at the roomname between the apostrophies put the room you want to join or create one
-        });
-    </script>
-</body>
-</html>
- 
-<!DOCTYPE html>
-<html lang="en">
-<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Color Preferences</title>
+<title>Video Chat with Color Preferences and Texting</title>
 <style>
   body {
     font-family: Arial, sans-serif;
     background-color: #f2f2f2;
     margin: 0;
-    padding: 20px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
   }
 
-  .container {
-    max-width: 600px;
-    margin: 0 auto;
+  .video-container {
+    background-color: #fff; /* Default background color */
     padding: 20px;
-    background-color: #fff;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
   }
 
-  label {
-    display: block;
+  #localVideo, #remoteVideo {
+    width: 320px;
+    height: 240px;
     margin-bottom: 10px;
   }
 
-  input[type="color"] {
-    padding: 5px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+  .color-picker {
+    margin-bottom: 20px;
   }
 
-  button {
-    padding: 10px 20px;
-    background-color: #3498db;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+  .color-picker input {
+    width: 200px;
+    padding: 10px;
+    margin: 5px;
   }
 
-  button:hover {
-    background-color: #2980b9;
+  .chat-container {
+    width: 100%;
+    max-width: 400px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    overflow-y: auto;
+  }
+
+  .message {
+    margin-bottom: 10px;
   }
 </style>
 </head>
 <body>
 
-<div class="container">
-  <h2>Color Preferences</h2>
-  <form id="colorForm">
-    <label for="backgroundColor">Background Color:</label>
-    <input type="color" id="backgroundColor" name="backgroundColor" value="#f2f2f2">
-
-    <label for="textColor">Text Color:</label>
-    <input type="color" id="textColor" name="textColor" value="#333333">
-
-    <button type="submit">Save Preferences</button>
-  </form>
+<div class="video-container">
+  <video id="localVideo" autoplay muted></video>
+  <video id="remoteVideo" autoplay></video>
 </div>
 
-<script>
-  // Function to handle form submission
-  document.getElementById('colorForm').addEventListener('submit', function(event) {
-    event.preventDefault(); // Prevent form submission
+<div class="color-picker">
+  <label for="backgroundColor">Background Color:</label>
+  <input type="color" id="backgroundColor" value="#ffffff">
+  
+  <label for="textColor">Text Color:</label>
+  <input type="color" id="textColor" value="#000000">
+</div>
 
-    // Get selected color values from form
+<div class="chat-container" id="chatContainer">
+  <!-- Chat messages will be displayed here -->
+</div>
+
+<div>
+  <input type="text" id="messageInput" placeholder="Type your message...">
+  <button onclick="sendMessage()">Send</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/simplewebrtc/out/simplewebrtc-with-adapter.bundle.js"></script>
+<script>
+  const webrtc = new SimpleWebRTC({
+    localVideoEl: 'localVideo',
+    remoteVideosEl: 'remoteVideo',
+    autoRequestMedia: true
+  });
+
+  webrtc.on('readyToCall', () => {
+    webrtc.joinRoom('your-room-name');
+  });
+
+  // Function to apply color preferences
+  function applyColorPreferences() {
     const backgroundColor = document.getElementById('backgroundColor').value;
     const textColor = document.getElementById('textColor').value;
 
-    // Save color preferences to local storage
-    localStorage.setItem('backgroundColor', backgroundColor);
-    localStorage.setItem('textColor', textColor);
-
-    // Optionally, you can apply the color preferences to the current page
     document.body.style.backgroundColor = backgroundColor;
     document.body.style.color = textColor;
-  });
+    document.querySelector('.video-container').style.backgroundColor = backgroundColor;
+  }
+
+  // Event listener for color picker change
+  document.getElementById('backgroundColor').addEventListener('change', applyColorPreferences);
+  document.getElementById('textColor').addEventListener('change', applyColorPreferences);
 
   // Apply color preferences when the page loads
-  window.addEventListener('load', function() {
-    const backgroundColor = localStorage.getItem('backgroundColor');
-    const textColor = localStorage.getItem('textColor');
+  window.addEventListener('load', applyColorPreferences);
 
-    if (backgroundColor) {
-      document.body.style.backgroundColor = backgroundColor;
-      document.getElementById('backgroundColor').value = backgroundColor;
+  // Function to send a chat message
+  function sendMessage() {
+    const messageInput = document.getElementById('messageInput');
+    const message = messageInput.value.trim();
+    if (message !== '') {
+      addMessage('You', message);
+      // Send message to other users via WebRTC data channel
+      webrtc.sendToAll('chat', { name: 'You', message: message });
+      messageInput.value = '';
     }
+  }
 
-    if (textColor) {
-      document.body.style.color = textColor;
-      document.getElementById('textColor').value = textColor;
+  // Function to add a chat message to the chat container
+  function addMessage(sender, message) {
+    const chatContainer = document.getElementById('chatContainer');
+    const messageElement = document.createElement('div');
+    messageElement.classList.add('message');
+    messageElement.textContent = `${sender}: ${message}`;
+    chatContainer.appendChild(messageElement);
+    // Scroll to the bottom of the chat container
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+  }
+
+  // Listen for incoming chat messages via WebRTC data channel
+  webrtc.connection.on('message', function(data) {
+    if (data.type === 'chat') {
+      addMessage(data.payload.name, data.payload.message);
     }
   });
 </script>
