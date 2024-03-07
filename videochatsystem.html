@@ -36,3 +36,103 @@
 </body>
 </html>
  
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Color Preferences</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f2f2f2;
+    margin: 0;
+    padding: 20px;
+  }
+
+  .container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+
+  label {
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  input[type="color"] {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+
+  button {
+    padding: 10px 20px;
+    background-color: #3498db;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background-color: #2980b9;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Color Preferences</h2>
+  <form id="colorForm">
+    <label for="backgroundColor">Background Color:</label>
+    <input type="color" id="backgroundColor" name="backgroundColor" value="#f2f2f2">
+
+    <label for="textColor">Text Color:</label>
+    <input type="color" id="textColor" name="textColor" value="#333333">
+
+    <button type="submit">Save Preferences</button>
+  </form>
+</div>
+
+<script>
+  // Function to handle form submission
+  document.getElementById('colorForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent form submission
+
+    // Get selected color values from form
+    const backgroundColor = document.getElementById('backgroundColor').value;
+    const textColor = document.getElementById('textColor').value;
+
+    // Save color preferences to local storage
+    localStorage.setItem('backgroundColor', backgroundColor);
+    localStorage.setItem('textColor', textColor);
+
+    // Optionally, you can apply the color preferences to the current page
+    document.body.style.backgroundColor = backgroundColor;
+    document.body.style.color = textColor;
+  });
+
+  // Apply color preferences when the page loads
+  window.addEventListener('load', function() {
+    const backgroundColor = localStorage.getItem('backgroundColor');
+    const textColor = localStorage.getItem('textColor');
+
+    if (backgroundColor) {
+      document.body.style.backgroundColor = backgroundColor;
+      document.getElementById('backgroundColor').value = backgroundColor;
+    }
+
+    if (textColor) {
+      document.body.style.color = textColor;
+      document.getElementById('textColor').value = textColor;
+    }
+  });
+</script>
+
+</body>
+</html>
